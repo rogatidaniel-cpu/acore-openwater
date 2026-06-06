@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#020810">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ACore Open Water">
+<title>ACore Open Water — AQUACORE.AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── AQUACORE.AI — ACore Open Water v2.0 ── */
+:root {
+  --bg-void:    #020810;
+  --bg-base:    #060d18;
+  --bg-surface: #0b1422;
+  --bg-raised:  #111d30;
+  --bg-overlay: #182538;
+
+  --ink-primary:   #f0f6ff;
+  --ink-secondary: #7a9ab8;
+  --ink-muted:     #3d5470;
+
+  --app-color:        #00c8ff;
+  --app-color-dim:    #009acc;
+  --app-color-glow:   rgba(0,200,255,0.15);
+  --app-color-border: rgba(0,200,255,0.25);
+
+  --success:  #34d399;
+  --warn:     #facc15;
+  --danger:   #ef4444;
+
+  --z-a2: #34d399;
+  --z-b1: #a3e635;
+  --z-b2: #facc15;
+  --z-c1: #f97316;
+  --z-c2: #ef4444;
+
+  --font-ui:   'Syne', system-ui, sans-serif;
+  --font-data: 'DM Mono', monospace;
+
+  --border-color: rgba(0,200,255,0.10);
+  --border:       1px solid var(--border-color);
+  --radius: 14px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg-void);
+  color: var(--ink-primary);
+  font-family: var(--font-ui);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Water texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(0,100,180,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 20% 100%, rgba(0,200,255,0.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── HEADER ── */
+header {
+  position: relative;
+  z-index: 200;
+  padding: 10px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--border);
+  background: rgba(2,8,16,0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  min-height: 54px;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand svg { width: 32px; height: 32px; flex-shrink: 0; }
+.brand-text { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+
+.brand-name {
+  font-family: var(--font-ui);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink-primary);
+}
+.brand-name span { color: var(--app-color); }
+
+.brand-sub {
+  font-family: var(--font-data);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.header-right { display: flex; gap: 8px; align-items: center; }
+
+/* Lang toggle */
+.lang-toggle {
+  display: flex;
+  background: var(--bg-raised);
+  border: var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.lang-toggle button {
+  padding: 4px 8px;
+  font-family: var(--font-data);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.lang-toggle button.active {
+  background: var(--app-color);
+  color: #000;
+  font-weight: 700;
+}
+
+.icon-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--ink-muted); font-size: 0.85rem;
+  transition: 0.2s; flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--app-color); color: #000; border-color: var(--app-color); }
+
+.safety-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-color);
+  transition: 0.3s; flex-shrink: 0;
+}
+.safety-dot.active {
+  background: var(--success);
+  box-shadow: 0 0 8px var(--success);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 6px var(--success); }
+  50%      { box-shadow: 0 0 14px var(--success); }
+}
+
+/* ── BOTTOM NAV ── */
+nav {
+  display: flex;
+  background: rgba(6,13,24,0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 0 max(10px, env(safe-area-inset-bottom));
+  position: fixed; bottom: 0; width: 100%;
+  border-top: var(--border);
+  z-index: 100;
+}
+nav button {
+  flex: 1; background: none; border: none;
+  color: var(--ink-muted);
+  font-family: var(--font-data);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; padding: 4px 2px; transition: 0.2s;
+}
+nav button.active { color: var(--app-color); }
+nav button svg { width: 20px; height: 20px; fill: currentColor; }
+
+/* ── MAIN ── */
+main {
+  flex: 1; overflow-y: auto;
+  padding: 12px 14px 80px;
+  position: relative; z-index: 1;
+}
+.tab { display: none; animation: fadeIn 0.2s ease; }
+.tab.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--bg-surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.card-title {
+  font-family: var(--font-data);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-title span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--app-color);
+  display: inline-block; flex-shrink: 0;
+}
+
+/* ── TIMER ── */
+.timer-wrap { text-align: center; padding: 10px 0 6px; }
+.timer-display {
+  font-family: var(--font-data);
+  font-size: 3.2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
+  color: var(--ink-primary);
+  text-shadow: 0 0 20px var(--app-color-glow);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.timer-sub {
+  font-family: var(--font-data);
+  font-size: 0.68rem;
+  color: var(--ink-muted);
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+/* ── METRICS GRID ── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px; margin-bottom: 10px;
+}
+.metric {
+  background: var(--bg-raised);
+  border: var(--border);
+  border-radius: 8px;
+  padding: 8px 6px; text-align: center;
+}
+.metric label {
+  font-family: var(--font-data);
+  font-size: 0.5rem;
+  color: var(--ink-muted);
+  display: block; margin-bottom: 4px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+.metric value {
+  font-family: var(--font-data);
+  font-size: 1rem; font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  display: block; color: var(--ink-primary);
+}
+.metric value.accent  { color: var(--app-color); }
+.metric value.warn    { color: var(--warn); }
+.metric value.success { color: var(--success); }
+
+/* ── MAP ── */
+#mapCanvas {
+  width: 100%; height: 140px;
+  background: var(--bg-raised);
+  border-radius: 10px; margin-bottom: 10px;
+  border: var(--border);
+}
+
+/* ── BIG TOUCH BUTTONS ── */
+.btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.btn {
+  flex: 1; padding: 14px 8px; border: none; border-radius: 10px;
+  font-family: var(--font-ui); font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 52px;
+}
+.btn-start  { background: var(--app-color); color: #000; }
+.btn-start:hover { filter: brightness(1.1); }
+.btn-stop   { background: var(--danger); color: #fff; }
+.btn-lap    { background: var(--bg-raised); color: var(--ink-secondary); border: var(--border); }
+.btn-lap:not(:disabled):hover { border-color: var(--app-color-border); color: var(--app-color); }
+.btn-finish { background: rgba(52,211,153,0.15); color: var(--success); border: 1px solid rgba(52,211,153,0.3); }
+.btn-finish:not(:disabled):hover { background: var(--success); color: #000; }
+.btn-reset  { background: var(--bg-raised); color: var(--ink-muted); border: var(--border); }
+.btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn:active { transform: scale(0.97); }
+
+/* Mode toggle */
+.btn-mode-active   { background: var(--app-color-glow); border: 1px solid var(--app-color-border); color: var(--app-color); }
+.btn-mode-inactive { background: var(--bg-raised); border: var(--border); color: var(--ink-muted); }
+
+/* ── PAYWALL BANNER ── */
+.paywall-banner {
+  background: var(--bg-raised);
+  border: 1px solid var(--app-color-border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 10px;
+}
+.paywall-text { font-size: 0.78rem; color: var(--ink-secondary); line-height: 1.4; }
+.paywall-text strong {
+  color: var(--app-color); display: block;
+  font-family: var(--font-data); font-size: 0.62rem;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px;
+}
+.btn-pro {
+  flex-shrink: 0; padding: 7px 12px; border-radius: 8px;
+  background: var(--app-color); color: #000;
+  font-family: var(--font-data); font-size: 0.65rem;
+  font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; border: none; cursor: pointer;
+}
+
+/* ── SAFETY PANEL ── */
+.safety-card {
+  background: rgba(52,211,153,0.04);
+  border: 1px solid rgba(52,211,153,0.15);
+  border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px;
+}
+.safety-card.alert {
+  background: rgba(239,68,68,0.06);
+  border-color: rgba(239,68,68,0.25);
+  animation: alertPulse 1s infinite;
+}
+@keyframes alertPulse {
+  0%,100% { border-color: rgba(239,68,68,0.25); }
+  50%     { border-color: rgba(239,68,68,0.7); }
+}
+.safety-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.82rem; margin-bottom: 6px;
+}
+.safety-row:last-child { margin-bottom: 0; }
+.toggle-switch {
+  width: 38px; height: 20px;
+  background: var(--bg-raised); border: var(--border);
+  border-radius: 10px; position: relative; cursor: pointer; transition: 0.2s; flex-shrink: 0;
+}
+.toggle-switch.on { background: var(--success); border-color: var(--success); }
+.toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s;
+}
+.toggle-switch.on::after { left: 20px; }
+
+/* ── CONDITIONS BADGES ── */
+.conditions-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.cond-badge {
+  font-family: var(--font-data); font-size: 0.62rem; font-weight: 500;
+  padding: 4px 10px; border-radius: 20px; border: var(--border);
+  color: var(--ink-muted); cursor: pointer; transition: 0.15s; letter-spacing: 0.04em;
+}
+.cond-badge.selected {
+  border-color: var(--app-color-border);
+  color: var(--app-color); background: var(--app-color-glow);
+}
+
+/* ── WEATHER ── */
+.weather-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.weather-item { background: var(--bg-raised); border: var(--border); border-radius: 8px; padding: 10px 12px; }
+.weather-item label {
+  font-family: var(--font-data); font-size: 0.56rem; color: var(--ink-muted);
+  display: block; margin-bottom: 4px; letter-spacing: 0.08em; text-transform: uppercase;
+}
+.weather-item value { font-family: var(--font-data); font-size: 1.1rem; font-weight: 700; display: block; color: var(--ink-primary); }
+.weather-item value.good { color: var(--success); }
+.weather-item value.ok   { color: var(--warn); }
+.weather-item value.bad  { color: var(--danger); }
+
+.weather-refresh {
+  width: 100%; margin-top: 8px; padding: 8px;
+  background: none; border: var(--border); border-radius: 8px;
+  color: var(--ink-muted); font-family: var(--font-ui); font-size: 0.75rem;
+  cursor: pointer; transition: 0.15s;
+}
+.weather-refresh:hover { border-color: var(--app-color-border); color: var(--app-color); }
+
+/* ── POOL TRAINING ── */
+.pool-style-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 12px; }
+.style-btn {
+  background: var(--bg-raised); border: var(--border); border-radius: 8px;
+  padding: 8px 4px; text-align: center; cursor: pointer; transition: 0.2s;
+  font-family: var(--font-data); font-size: 0.7rem; font-weight: 700; color: var(--ink-muted);
+}
+.style-btn.selected { border-color: var(--app-color-border); color: var(--app-color); background: var(--app-color-glow); }
+
+.form-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+.form-row label {
+  font-family: var(--font-data); font-size: 0.65rem; color: var(--ink-muted);
+  letter-spacing: 0.08em; text-transform: uppercase; flex-shrink: 0; margin-bottom: 0;
+}
+.form-row input, .form-row select {
+  flex: 1; background: var(--bg-raised); border: var(--border);
+  border-radius: 8px; padding: 8px 10px; color: var(--ink-primary);
+  font-family: var(--font-ui); font-size: 0.85rem; width: auto;
+}
+.form-row input:focus, .form-row select:focus {
+  outline: none; border-color: var(--app-color-dim);
+  box-shadow: 0 0 0 2px var(--app-color-glow);
+}
+
+/* ── PACE ZONES ── */
+.zones-list { display: flex; flex-direction: column; gap: 6px; }
+.zone-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--bg-raised); border: var(--border); border-radius: 8px;
+  padding: 8px 12px; border-left: 3px solid transparent;
+}
+.zone-row.z1 { border-left-color: var(--z-a2); }
+.zone-row.z2 { border-left-color: var(--z-b1); }
+.zone-row.z3 { border-left-color: var(--z-b2); }
+.zone-row.z4 { border-left-color: var(--z-c1); }
+.zone-row.z5 { border-left-color: var(--z-c2); }
+.zone-name { font-size: 0.8rem; font-weight: 700; color: var(--ink-primary); }
+.zone-pace { font-family: var(--font-data); font-size: 0.85rem; color: var(--app-color); }
+
+/* ── HISTORY ── */
+.history-item {
+  background: var(--bg-raised); border: var(--border); border-radius: 10px;
+  padding: 10px 12px; margin-bottom: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.history-meta strong { font-size: 0.85rem; display: block; margin-bottom: 2px; }
+.history-meta small  { font-family: var(--font-data); font-size: 0.62rem; color: var(--ink-muted); }
+.history-type {
+  font-family: var(--font-data); font-size: 0.58rem; font-weight: 700;
+  padding: 3px 8px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.type-ow   { background: var(--app-color-glow); color: var(--app-color); border: 1px solid var(--app-color-border); }
+.type-pool { background: rgba(52,211,153,0.12); color: var(--success); border: 1px solid rgba(52,211,153,0.2); }
+
+/* ── LAP LIST ── */
+.lap-list { max-height: 120px; overflow-y: auto; margin-top: 8px; }
+.lap-row {
+  display: flex; justify-content: space-between;
+  padding: 5px 0; border-bottom: var(--border);
+  font-family: var(--font-data); font-size: 0.72rem;
+}
+.lap-row span:first-child { color: var(--ink-muted); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: calc(64px + 12px); left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-overlay); border: var(--border);
+  color: var(--ink-primary); padding: 8px 16px; border-radius: 8px;
+  font-family: var(--font-data); font-size: 0.72rem; letter-spacing: 0.06em;
+  z-index: 9999; opacity: 0; transition: all 0.25s ease;
+  pointer-events: none; white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── TIPS ── */
+.tip-card {
+  background: var(--bg-raised); border-radius: 8px;
+  padding: 10px 12px; border-left: 3px solid transparent;
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 25H75L95 50L75 75H5L25 50L5 25Z" fill="var(--app-color)"/>
+      <path d="M25 37H70L80 50L70 63H25L35 50L25 37Z" fill="#020810"/>
+      <path d="M45 45H65L69 50L65 55H45L49 50L45 45Z" fill="var(--app-color)"/>
+    </svg>
+    <div class="brand-text">
+      <span class="brand-name">AQUA<span>CORE</span>.AI</span>
+      <span class="brand-sub" id="brandSub">Open Water</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="lang-toggle">
+      <button id="langIT" onclick="setLang('IT')" class="active">IT</button>
+      <button id="langEN" onclick="setLang('EN')">EN</button>
+    </div>
+    <div class="safety-dot" id="safetyDot" title="Live Safety Sharing"></div>
+    <button class="icon-btn" onclick="toggleSafetyShare()" title="Safety Share">📡</button>
+    <button class="icon-btn" onclick="showTab('weather')" title="Conditions">🌊</button>
+  </div>
+</header>
+
+<nav>
+  <button class="active" onclick="showTab('tracker')" id="navTrackerBtn">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+    <span data-it="Tracker" data-en="Tracker">Tracker</span>
+  </button>
+  <button onclick="showTab('pool')" id="navPoolBtn">
+    <svg viewBox="0 0 24 24"><path d="M22 21c-1.11 0-1.73-.37-2.18-.64-.37-.22-.6-.36-1.15-.36-.56 0-.78.13-1.15.36-.46.27-1.07.64-2.18.64s-1.73-.37-2.18-.64c-.37-.22-.6-.36-1.15-.36-.56 0-.78.13-1.15.36-.46.27-1.08.64-2.19.64-1.11 0-1.73-.37-2.18-.64-.37-.22-.6-.36-1.15-.36-.56 0-.78.13-1.15.36C4.34 20.63 3.52 21 2 21v-2c.56 0 .78-.13 1.15-.36.46-.27 1.08-.64 2.19-.64 1.11 0 1.73.37 2.18.64.37.22.6.36 1.15.36.56 0 .78-.13 1.15-.36.46-.27 1.08-.64 2.19-.64 1.11 0 1.73.37 2.18.64.37.22.6.36 1.15.36.56 0 .78-.13 1.15-.36.46-.27 1.08-.64 2.19-.64 1.11 0 1.73.37 2.18.64.37.22.6.36 1.15.36V21z"/></svg>
+    <span data-it="Vasca" data-en="Pool">Vasca</span>
+  </button>
+  <button onclick="showTab('weather')" id="navWeatherBtn">
+    <svg viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/></svg>
+    <span data-it="Meteo" data-en="Weather">Meteo</span>
+  </button>
+  <button onclick="showTab('paces')" id="navPacesBtn">
+    <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zm-1.67 14h-4v-2h4v2zm0-4h-4v-2h4v2zm0-4h-4V8h4v2z"/></svg>
+    <span data-it="Passi" data-en="Paces">Passi</span>
+  </button>
+  <button onclick="showTab('history')" id="navHistoryBtn">
+    <svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+    <span data-it="Storico" data-en="History">Storico</span>
+  </button>
+</nav>
+
+<main>
+
+  <!-- ══ TRACKER TAB ══ -->
+  <section id="tab-tracker" class="tab active">
+    <div class="card">
+      <div class="card-title"><span></span><span data-it="Tipo sessione" data-en="Session type">Tipo sessione</span></div>
+      <div style="display:flex; gap:6px; margin-bottom:12px;">
+        <button class="btn btn-mode-active" id="modeOW" onclick="setMode('ow')">🌊 <span data-it="Acque libere" data-en="Open Water">Acque libere</span></button>
+        <button class="btn btn-mode-inactive" id="modePool" onclick="setMode('pool')">🏊 <span data-it="Vasca" data-en="Pool">Vasca</span></button>
+      </div>
+
+      <div class="card-title"><span></span><span data-it="Condizioni" data-en="Conditions">Condizioni</span></div>
+      <div class="conditions-row" id="condBadges">
+        <span class="cond-badge selected" onclick="toggleCond(this)" data-it="Calmo" data-en="Calm">Calmo</span>
+        <span class="cond-badge" onclick="toggleCond(this)" data-it="Mosso" data-en="Choppy">Mosso</span>
+        <span class="cond-badge" onclick="toggleCond(this)" data-it="Corrente" data-en="Current">Corrente</span>
+        <span class="cond-badge" onclick="toggleCond(this)" data-it="Freddo &lt;18°" data-en="Cold &lt;18°">Freddo &lt;18°</span>
+        <span class="cond-badge" onclick="toggleCond(this)" data-it="Muta" data-en="Wetsuit">Muta</span>
+        <span class="cond-badge" onclick="toggleCond(this)" data-it="No visibilità" data-en="No visibility">No visibilità</span>
+      </div>
+
+      <div class="timer-wrap">
+        <div class="timer-display" id="timer">00:00:00</div>
+        <div class="timer-sub" id="movingTimeSub">Moving: 00:00:00</div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric"><label data-it="DISTANZA" data-en="DISTANCE">DISTANZA</label><value id="dist" class="accent">0.000 km</value></div>
+        <div class="metric"><label>PACE /100m</label><value id="pace">--:--</value></div>
+        <div class="metric"><label data-it="VELOCITÀ" data-en="SPEED">VELOCITÀ</label><value id="speed">-- km/h</value></div>
+        <div class="metric"><label data-it="BRACCIATE" data-en="STROKES">BRACCIATE</label><value id="strokes">--</value></div>
+        <div class="metric"><label data-it="TEMP ACQUA" data-en="WATER TEMP">TEMP ACQUA</label><value id="waterTemp" class="success">--°C</value></div>
+        <div class="metric"><label>TSS</label><value id="tss">0</value></div>
+      </div>
+
+      <canvas id="mapCanvas"></canvas>
+
+      <!-- Paywall after 3 sessions -->
+      <div id="paywallBanner" style="display:none;">
+        <div class="paywall-banner">
+          <div class="paywall-text">
+            <strong id="paywallTitle">🔒 Piano Free — Limite raggiunto</strong>
+            <span id="paywallDesc">Passa a Pro per sessioni illimitate, storico completo e safety sharing avanzato.</span>
+          </div>
+          <button class="btn-pro">Pro 7€/m</button>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-start" id="btnStart" onclick="toggleTimer()">▶ START</button>
+        <button class="btn btn-lap" id="btnLap" onclick="addLap()" disabled>🏁 LAP</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-finish" id="btnFinish" onclick="finishSession()" disabled>✅ <span data-it="SALVA" data-en="SAVE">SALVA</span></button>
+        <button class="btn btn-reset" onclick="resetTimer()">↻ RESET</button>
+      </div>
+    </div>
+
+    <div class="card" id="lapCard" style="display:none;">
+      <div class="card-title"><span></span><span data-it="Parziali" data-en="Splits">Parziali</span></div>
+      <div class="lap-list" id="lapList"></div>
+    </div>
+
+    <div class="safety-card" id="safetyPanel">
+      <div class="card-title" style="margin-bottom:8px;"><span style="background:var(--success)"></span>Safety</div>
+      <div class="safety-row">
+        <span data-it="Condivisione posizione live" data-en="Live position sharing">Condivisione posizione live</span>
+        <div class="toggle-switch" id="shareToggle" onclick="toggleSafetyShare()"></div>
+      </div>
+      <div class="safety-row" style="font-family:var(--font-data); font-size:0.7rem; color:var(--ink-muted);" id="safetyStatus">
+        Off — attiva per condividere il GPS con un contatto di emergenza
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ POOL TAB ══ -->
+  <section id="tab-pool" class="tab">
+    <div class="card">
+      <div class="card-title"><span></span><span data-it="Allenamento in vasca — inserisci il tuo PB" data-en="Pool training — Enter your reference time">Allenamento in vasca — inserisci il tuo PB</span></div>
+      <div class="pool-style-grid">
+        <div class="style-btn selected" onclick="selectStyle(this,'SL')">SL</div>
+        <div class="style-btn" onclick="selectStyle(this,'DO')">DO</div>
+        <div class="style-btn" onclick="selectStyle(this,'RA')">RA</div>
+        <div class="style-btn" onclick="selectStyle(this,'FA')">FA</div>
+        <div class="style-btn" onclick="selectStyle(this,'MI')">MI</div>
+      </div>
+      <div class="form-row">
+        <label data-it="Dist" data-en="Dist">Dist</label>
+        <select id="pbDist">
+          <option value="50">50m</option>
+          <option value="100" selected>100m</option>
+          <option value="200">200m</option>
+          <option value="400">400m</option>
+          <option value="800">800m</option>
+          <option value="1500">1500m</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label data-it="Tempo" data-en="Time">Tempo</label>
+        <input type="number" id="pbMin" placeholder="min" min="0" style="max-width:70px;">
+        <span style="color:var(--ink-muted); padding:0 4px;">:</span>
+        <input type="number" id="pbSec" placeholder="sec" min="0" max="59" style="max-width:70px;">
+        <span style="color:var(--ink-muted); padding:0 4px;">.</span>
+        <input type="number" id="pbCs" placeholder="cs" min="0" max="99" style="max-width:70px;">
+      </div>
+      <div class="form-row">
+        <label data-it="Vasca" data-en="Pool">Vasca</label>
+        <select id="poolLen">
+          <option value="25">25m</option>
+          <option value="50">50m</option>
+        </select>
+      </div>
+      <button class="btn btn-start" onclick="calcPoolPaces()" style="width:100%; margin-top:4px;">⚡ <span data-it="Calcola passi" data-en="Calculate paces">Calcola passi</span></button>
+    </div>
+
+    <div class="card" id="poolPacesCard" style="display:none;">
+      <div class="card-title"><span></span><span data-it="Passi allenamento — adattati OW" data-en="Training paces — OW adjusted">Passi allenamento — adattati OW</span></div>
+      <div class="zones-list" id="poolZonesList"></div>
+      <p style="font-family:var(--font-data); font-size:0.62rem; color:var(--ink-muted); margin-top:10px; line-height:1.5;" data-it="Passo OW = passo vasca +8–12% (niente virate, corrente, affaticamento)" data-en="OW pace = pool pace +8–12% (no turns, current, open water fatigue)">
+        Passo OW = passo vasca +8–12% (niente virate, corrente, affaticamento)
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ WEATHER TAB ══ -->
+  <section id="tab-weather" class="tab">
+    <div class="card">
+      <div class="card-title"><span></span><span data-it="Condizioni acqua e meteo" data-en="Water & weather conditions">Condizioni acqua e meteo</span></div>
+      <div class="weather-grid">
+        <div class="weather-item"><label data-it="TEMP ACQUA" data-en="WATER TEMP">TEMP ACQUA</label><value id="wTemp" class="good">--°C</value></div>
+        <div class="weather-item"><label data-it="TEMP ARIA" data-en="AIR TEMP">TEMP ARIA</label><value id="wAir">--°C</value></div>
+        <div class="weather-item"><label data-it="VENTO" data-en="WIND">VENTO</label><value id="wWind">-- km/h</value></div>
+        <div class="weather-item"><label data-it="CONDIZIONI" data-en="CONDITIONS">CONDIZIONI</label><value id="wCond" class="good">--</value></div>
+      </div>
+      <button class="weather-refresh" onclick="fetchWeather()">🌊 <span data-it="Aggiorna condizioni locali" data-en="Fetch local conditions">Aggiorna condizioni locali</span></button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span></span><span data-it="Guida muta" data-en="Wetsuit guide">Guida muta</span></div>
+      <div class="zones-list">
+        <div class="zone-row z5"><span class="zone-name" style="color:var(--z-c2);" data-it="Sotto 14°C" data-en="Below 14°C">Sotto 14°C</span><span style="font-family:var(--font-data);font-size:0.72rem;color:var(--danger);" data-it="Pericoloso — non nuotare" data-en="Dangerous — do not swim">Pericoloso — non nuotare</span></div>
+        <div class="zone-row z4"><span class="zone-name" style="color:var(--z-c1);" data-it="14–18°C" data-en="14–18°C">14–18°C</span><span style="font-family:var(--font-data);font-size:0.72rem;color:var(--z-c1);" data-it="Muta intera obbligatoria" data-en="Full wetsuit required">Muta intera obbligatoria</span></div>
+        <div class="zone-row z3"><span class="zone-name" style="color:var(--z-b2);" data-it="18–22°C" data-en="18–22°C">18–22°C</span><span style="font-family:var(--font-data);font-size:0.72rem;color:var(--z-b2);" data-it="Muta consigliata" data-en="Wetsuit recommended">Muta consigliata</span></div>
+        <div class="zone-row z2"><span class="zone-name" style="color:var(--z-b1);" data-it="22–26°C" data-en="22–26°C">22–26°C</span><span style="font-family:var(--font-data);font-size:0.72rem;color:var(--z-b1);" data-it="Facoltativa" data-en="Optional">Facoltativa</span></div>
+        <div class="zone-row z1"><span class="zone-name" style="color:var(--z-a2);" data-it="Oltre 26°C" data-en="Above 26°C">Oltre 26°C</span><span style="font-family:var(--font-data);font-size:0.72rem;color:var(--success);" data-it="Senza muta" data-en="No wetsuit">Senza muta</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PACES TAB ══ -->
+  <section id="tab-paces" class="tab">
+    <div class="card">
+      <div class="card-title"><span></span><span data-it="Zone allenamento OW" data-en="OW training zones">Zone allenamento OW</span></div>
+      <div class="zones-list" id="owZonesList">
+        <div style="font-family:var(--font-data);font-size:0.75rem;color:var(--ink-muted);text-align:center;padding:20px;" data-it="Inserisci il tuo tempo in vasca per calcolare i passi OW" data-en="Enter your pool time in the Pool tab to calculate OW paces">
+          Inserisci il tuo tempo in vasca per calcolare i passi OW
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span></span><span data-it="Consigli tecnici OW" data-en="OW training tips">Consigli tecnici OW</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="tip-card" style="border-left-color:var(--app-color)">
+          <strong style="display:block;margin-bottom:4px;color:var(--app-color);font-size:0.82rem;" data-it="Sighting" data-en="Sighting">Sighting</strong>
+          <span style="color:var(--ink-secondary);font-family:var(--font-data);font-size:0.7rem;" data-it="Ogni 6–10 bracciate. Occhi a coccodrillo — sollevamento minimo riduce la resistenza." data-en="Every 6–10 strokes. Crocodile eyes — minimal head lift reduces drag and keeps rhythm.">Ogni 6–10 bracciate. Occhi a coccodrillo — sollevamento minimo riduce la resistenza.</span>
+        </div>
+        <div class="tip-card" style="border-left-color:var(--warn)">
+          <strong style="display:block;margin-bottom:4px;color:var(--warn);font-size:0.82rem;" data-it="Navigazione" data-en="Navigation">Navigazione</strong>
+          <span style="color:var(--ink-secondary);font-family:var(--font-data);font-size:0.7rem;" data-it="Scegli 2–3 boe davanti. Nuota leggermente fuori linea verso riparo per usare corrente o scia." data-en="Pick 2–3 buoys ahead. Swim slightly off-line toward shelter to use current or drafting.">Scegli 2–3 boe davanti. Nuota leggermente fuori linea verso riparo per usare corrente o scia.</span>
+        </div>
+        <div class="tip-card" style="border-left-color:var(--success)">
+          <strong style="display:block;margin-bottom:4px;color:var(--success);font-size:0.82rem;" data-it="Scia" data-en="Drafting">Scia</strong>
+          <span style="color:var(--ink-secondary);font-family:var(--font-data);font-size:0.7rem;" data-it="Posizione ai piedi (0.5–1m) risparmia ~25% energia. Scia laterale ~15%." data-en="Position at feet (0.5–1m) saves ~25% energy. Hip drafting saves ~15%.">Posizione ai piedi (0.5–1m) risparmia ~25% energia. Scia laterale ~15%.</span>
+        </div>
+        <div class="tip-card" style="border-left-color:#c084fc">
+          <strong style="display:block;margin-bottom:4px;color:#c084fc;font-size:0.82rem;" data-it="Acqua fredda" data-en="Cold water">Acqua fredda</strong>
+          <span style="color:var(--ink-secondary);font-family:var(--font-data);font-size:0.7rem;" data-it="Calo passo 5–10% sotto 18°C. Riscaldati con immersione del viso prima della partenza." data-en="Expect 5–10% pace drop below 18°C. Warm up with face immersion before start.">Calo passo 5–10% sotto 18°C. Riscaldati con immersione del viso prima della partenza.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ HISTORY TAB ══ -->
+  <section id="tab-history" class="tab">
+    <div class="card">
+      <div class="card-title"><span></span><span data-it="Storico sessioni" data-en="Session history">Storico sessioni</span></div>
+      <div id="historyList">
+        <div style="font-family:var(--font-data);font-size:0.75rem;color:var(--ink-muted);text-align:center;padding:20px;" data-it="Nessuna sessione registrata." data-en="No sessions yet.">Nessuna sessione registrata.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── AQUACORE.AI Auth Guard + Pro Status ──
+window.__acoreIsPro = false; // default sicuro
+(async function() {
+  const SB_URL = 'https://vqfzywjiyzpwhzqwixex.supabase.co';
+  const SB_KEY = 'sb_publishable_GnNyFpSAurKKp6sOl9xc6w_zXCHGa9m';
+  const LOGIN_URL = 'https://getaquacore.com/login';
+  try {
+    const sb = window.supabase.createClient(SB_URL, SB_KEY);
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      localStorage.setItem('acore_pending_app', 'openwater');
+      window.location.replace(LOGIN_URL);
+      return;
+    }
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('is_pro, pro_apps, pro_expires_at')
+      .eq('id', session.user.id)
+      .single();
+    if (profile) {
+      const notExpired = !profile.pro_expires_at || new Date(profile.pro_expires_at) > new Date();
+      window.__acoreIsPro = profile.is_pro && notExpired;
+    }
+  } catch(e) {
+    console.warn('[ACore Open Water] Auth guard skipped (offline?):', e);
+  }
+})();
+
+const STORAGE = 'acore_ow_v2';
+const FREE_SESSION_LIMIT = 3;
+let lang = 'IT';
+
+let state = {
+  mode: 'ow',
+  selectedStyle: 'SL',
+  safetyShare: false,
+  isPro: false,
+  pb: {},
+  history: [],
+  timer: { running:false, elapsed:0, moving:0, paused:false, startTime:null, startMovingTime:null, lastPauseOffset:0, lastMovingPauseOffset:0 },
+  gps: { enabled:false, coords:[], totalDist:0, lastPos:null, speed:0 },
+  metrics: { tss:0, pace:0, strokes:0 },
+  laps: [],
+  conditions: ['Calmo']
+};
+
+let timerInt, gpsWatch;
+const canvas = document.getElementById('mapCanvas');
+const ctx = canvas.getContext('2d');
+
+const OW_PENALTY = 1.10;
+const ZONES = {
+  A2: { coef:1.18, color:'var(--z-a2)', label:'A2 — Aerobico base', stressFactor:1 },
+  B1: { coef:1.10, color:'var(--z-b1)', label:'B1 — Soglia', stressFactor:3 },
+  B2: { coef:1.04, color:'var(--z-b2)', label:'B2 — VO₂max', stressFactor:5 },
+  C1: { coef:1.00, color:'var(--z-c1)', label:'C1 — Ritmo gara', stressFactor:8 },
+  C2: { coef:0.98, color:'var(--z-c2)', label:'C2 — Sprint', stressFactor:12 }
+};
+
+// ── I18N ──
+function setLang(l) {
+  lang = l;
+  document.getElementById('langIT').classList.toggle('active', l === 'IT');
+  document.getElementById('langEN').classList.toggle('active', l === 'EN');
+  document.querySelectorAll('[data-it]').forEach(el => {
+    const key = l === 'IT' ? 'it' : 'en';
+    if (el.dataset[key]) el.textContent = el.dataset[key];
+  });
+  updateSafetyText();
+  renderHistory();
+  checkPaywall();
+  save();
+}
+
+function t(it, en) { return lang === 'IT' ? it : en; }
+
+function updateSafetyText() {
+  const el = document.getElementById('safetyStatus');
+  if (state.safetyShare) {
+    el.textContent = t('📡 Posizione condivisa — copia il link per il contatto di emergenza', '📡 Sharing position — copy link to send to emergency contact');
+  } else {
+    el.textContent = t('Off — attiva per condividere il GPS con un contatto di emergenza', 'Off — enable to share your GPS with an emergency contact');
+  }
+}
+
+// ── PAYWALL ──
+function checkPaywall() {
+  const banner = document.getElementById('paywallBanner');
+  if (!state.isPro && state.history.length >= FREE_SESSION_LIMIT) {
+    banner.style.display = 'block';
+    document.getElementById('paywallTitle').textContent = t('🔒 Piano Free — Limite raggiunto', '🔒 Free Plan — Limit reached');
+    document.getElementById('paywallDesc').textContent = t('Passa a Pro per sessioni illimitate, storico completo e safety sharing avanzato.', 'Upgrade to Pro for unlimited sessions, full history and advanced safety sharing.');
+    document.getElementById('btnStart').disabled = true;
+    document.getElementById('btnStart').style.opacity = '0.4';
+  } else {
+    banner.style.display = 'none';
+    document.getElementById('btnStart').disabled = false;
+    document.getElementById('btnStart').style.opacity = '1';
+  }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  // Attende il guard asincrono (max 3s) poi carica isPro
+  await new Promise(resolve => {
+    const start = Date.now();
+    const check = () => {
+      if (window.__acoreIsPro !== undefined || Date.now() - start > 3000) resolve();
+      else setTimeout(check, 50);
+    };
+    check();
+  });
+  const saved = localStorage.getItem(STORAGE);
+  if (saved) Object.assign(state, JSON.parse(saved));
+  state.isPro = window.__acoreIsPro === true;
+  state.timer.running = false;
+  resizeCanvas();
+  renderHistory();
+  checkPaywall();
+  window.addEventListener('resize', resizeCanvas);
+});
+
+function save() { localStorage.setItem(STORAGE, JSON.stringify(state)); }
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  const btn = document.getElementById('nav' + tab.charAt(0).toUpperCase() + tab.slice(1) + 'Btn');
+  if (btn) btn.classList.add('active');
+}
+
+function setMode(m) {
+  state.mode = m;
+  const ow = document.getElementById('modeOW');
+  const pool = document.getElementById('modePool');
+  ow.className = m === 'ow' ? 'btn btn-mode-active' : 'btn btn-mode-inactive';
+  pool.className = m === 'pool' ? 'btn btn-mode-active' : 'btn btn-mode-inactive';
+  save();
+}
+
+function toggleCond(el) {
+  el.classList.toggle('selected');
+  state.conditions = Array.from(document.querySelectorAll('.cond-badge.selected')).map(b => b.textContent);
+  save();
+}
+
+// ── TIMER ──
+function toggleTimer() {
+  const btn = document.getElementById('btnStart');
+  if (state.timer.running) {
+    clearInterval(timerInt);
+    state.timer.running = false; state.timer.paused = true;
+    state.timer.lastPauseOffset += Date.now() - state.timer.startTime;
+    state.timer.lastMovingPauseOffset += Date.now() - state.timer.startMovingTime;
+    btn.innerHTML = '▶ ' + t('RIPRENDI', 'RESUME');
+    btn.className = 'btn btn-start';
+    if (gpsWatch) { navigator.geolocation.clearWatch(gpsWatch); gpsWatch = null; }
+  } else {
+    if ('wakeLock' in navigator) navigator.wakeLock.request('screen').catch(()=>{});
+    state.timer.running = true; state.timer.paused = false;
+    state.timer.startTime = Date.now(); state.timer.startMovingTime = Date.now();
+    btn.innerHTML = '⏸ ' + t('PAUSA', 'PAUSE');
+    btn.className = 'btn btn-stop';
+    document.getElementById('btnLap').disabled = false;
+    document.getElementById('btnFinish').disabled = false;
+    timerInt = setInterval(update, 500);
+    startGPS();
+  }
+  vibrate(40); save();
+}
+
+function resetTimer() {
+  clearInterval(timerInt);
+  state.timer = { running:false, elapsed:0, moving:0, paused:false, startTime:null, startMovingTime:null, lastPauseOffset:0, lastMovingPauseOffset:0 };
+  state.gps = { enabled:false, coords:[], totalDist:0, lastPos:null, speed:0 };
+  state.metrics = { tss:0, pace:0, strokes:0 };
+  state.laps = [];
+  const btn = document.getElementById('btnStart');
+  btn.innerHTML = '▶ START';
+  btn.className = 'btn btn-start';
+  document.getElementById('btnLap').disabled = true;
+  document.getElementById('btnFinish').disabled = true;
+  document.getElementById('lapCard').style.display = 'none';
+  if (gpsWatch) { navigator.geolocation.clearWatch(gpsWatch); gpsWatch = null; }
+  updateDisplay(); resizeCanvas(); ctx.clearRect(0,0,canvas.width,canvas.height);
+  save();
+}
+
+function update() {
+  if (!state.timer.running) return;
+  const ms = (Date.now() - state.timer.startTime) + state.timer.lastPauseOffset;
+  state.timer.elapsed = Math.floor(ms / 1000);
+  const movingMs = (Date.now() - state.timer.startMovingTime) + state.timer.lastMovingPauseOffset;
+  state.timer.moving = Math.floor(movingMs / 1000);
+  if (state.gps.totalDist > 0 && state.timer.moving > 0) {
+    const distM = state.gps.totalDist;
+    const mins = state.timer.moving / 60;
+    state.metrics.pace = mins / (distM / 100);
+    const intensity = Math.min(1.2, 2.0 / (state.metrics.pace || 1));
+    state.metrics.tss += (intensity ** 2) * (1 / 18000) * 100;
+  }
+  updateDisplay();
+}
+
+function updateDisplay() {
+  const fmt = s => `${String(Math.floor(s/3600)).padStart(2,'0')}:${String(Math.floor((s%3600)/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  document.getElementById('timer').textContent = fmt(state.timer.elapsed);
+  document.getElementById('movingTimeSub').textContent = `Moving: ${fmt(state.timer.moving)}`;
+  document.getElementById('dist').textContent = (state.gps.totalDist / 1000).toFixed(3) + ' km';
+  document.getElementById('speed').textContent = state.gps.speed > 0 ? (state.gps.speed * 3.6).toFixed(1) + ' km/h' : '-- km/h';
+  document.getElementById('tss').textContent = Math.round(state.metrics.tss);
+  if (state.metrics.pace > 0 && isFinite(state.metrics.pace)) {
+    const m = Math.floor(state.metrics.pace);
+    const s = Math.round((state.metrics.pace - m) * 60);
+    document.getElementById('pace').textContent = `${m}:${String(s).padStart(2,'0')}`;
+  }
+}
+
+// ── GPS ──
+function startGPS() {
+  if (!navigator.geolocation) return;
+  state.gps.enabled = true;
+  gpsWatch = navigator.geolocation.watchPosition(p => {
+    const { latitude, longitude, speed, accuracy } = p.coords;
+    if (accuracy > 20) return;
+    state.gps.speed = speed || 0;
+    if (state.gps.lastPos) {
+      const d = haversine(state.gps.lastPos.lat, state.gps.lastPos.lng, latitude, longitude);
+      if (d > 2 && d < 30) {
+        state.gps.totalDist += d;
+        state.gps.coords.push({ lat: latitude, lng: longitude });
+        state.gps.lastPos = { lat: latitude, lng: longitude };
+        drawRoute();
+      }
+    } else {
+      state.gps.lastPos = { lat: latitude, lng: longitude };
+      state.gps.coords.push({ lat: latitude, lng: longitude });
+    }
+  }, () => {}, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371e3, toRad = x => x * Math.PI / 180;
+  const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function resizeCanvas() { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; drawRoute(); }
+
+function drawRoute() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if (state.gps.coords.length < 2) {
+    ctx.fillStyle = 'rgba(0,200,255,0.05)';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = 'rgba(0,200,255,0.2)';
+    ctx.font = '11px DM Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(t('Il percorso GPS apparirà qui', 'GPS route will appear here'), canvas.width/2, canvas.height/2);
+    return;
+  }
+  const minX = Math.min(...state.gps.coords.map(c=>c.lng));
+  const maxX = Math.max(...state.gps.coords.map(c=>c.lng));
+  const minY = Math.min(...state.gps.coords.map(c=>c.lat));
+  const maxY = Math.max(...state.gps.coords.map(c=>c.lat));
+  const pad = 16;
+  const scaleX = (canvas.width - pad*2) / (maxX - minX || 0.001);
+  const scaleY = (canvas.height - pad*2) / (maxY - minY || 0.001);
+  const scale = Math.min(scaleX, scaleY);
+  ctx.strokeStyle = '#00c8ff';
+  ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath();
+  state.gps.coords.forEach((c,i) => {
+    const x = pad + (c.lng - minX) * scale;
+    const y = canvas.height - pad - (c.lat - minY) * scale;
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  if (state.gps.coords.length > 0) {
+    const s = state.gps.coords[0];
+    ctx.fillStyle = 'var(--success)';
+    ctx.beginPath();
+    ctx.arc(pad + (s.lng-minX)*scale, canvas.height-pad-(s.lat-minY)*scale, 5, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function addLap() {
+  const lapTime = state.timer.moving;
+  const dist = state.gps.totalDist;
+  const pace = dist > 0 ? (lapTime/60) / (dist/100) : 0;
+  state.laps.push({ time: lapTime, dist, pace });
+  state.timer.startMovingTime = Date.now();
+  state.timer.lastMovingPauseOffset = 0;
+  state.gps.totalDist = 0; state.gps.coords = []; state.gps.lastPos = null;
+  renderLaps(); vibrate([40,20,40]); toast('🏁 ' + t('Parziale salvato', 'Lap saved')); drawRoute();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function renderLaps() {
+  const card = document.getElementById('lapCard');
+  const list = document.getElementById('lapList');
+  if (state.laps.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = '';
+  state.laps.forEach((l, i) => {
+    const fmtT = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    const p = l.pace > 0 ? `${Math.floor(l.pace)}:${String(Math.round((l.pace%1)*60)).padStart(2,'0')}/100m` : '--';
+    list.innerHTML += `<div class="lap-row"><span>Lap ${i+1}</span><span>${fmtT(l.time)}</span><span>${(l.dist/1000).toFixed(2)}km</span><span>${p}</span></div>`;
+  });
+}
+
+function finishSession() {
+  if (!state.timer.running && !state.timer.paused) return;
+  clearInterval(timerInt);
+  const session = {
+    id: Date.now(),
+    date: new Date().toISOString().split('T')[0],
+    mode: state.mode,
+    totalTime: state.timer.elapsed,
+    movingTime: state.timer.moving,
+    dist: state.gps.totalDist / 1000,
+    avgPace: state.metrics.pace,
+    tss: Math.round(state.metrics.tss),
+    laps: state.laps.length,
+    conditions: [...state.conditions]
+  };
+  state.history.unshift(session);
+  if (state.history.length > 50) state.history.pop();
+  save(); renderHistory(); checkPaywall();
+  toast('✅ ' + t('Sessione salvata', 'Session saved')); resetTimer();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  // Free tier: show max 3 sessions
+  const toShow = state.isPro ? state.history : state.history.slice(0, FREE_SESSION_LIMIT);
+  if (toShow.length === 0) {
+    list.innerHTML = `<div style="font-family:var(--font-data);font-size:0.75rem;color:var(--ink-muted);text-align:center;padding:20px;">${t('Nessuna sessione registrata.', 'No sessions yet.')}</div>`;
+    return;
+  }
+  list.innerHTML = toShow.map(h => `
+    <div class="history-item">
+      <div class="history-meta">
+        <strong>${h.date} — ${(h.dist||0).toFixed(2)} km</strong>
+        <small>${Math.round((h.movingTime||0)/60)} min · TSS ${h.tss||0} · ${(h.conditions||[]).join(', ')}</small>
+      </div>
+      <span class="history-type ${h.mode==='ow'?'type-ow':'type-pool'}">${h.mode==='ow'?'OW':'POOL'}</span>
+    </div>`).join('');
+  if (!state.isPro && state.history.length > FREE_SESSION_LIMIT) {
+    list.innerHTML += `<div style="font-family:var(--font-data);font-size:0.65rem;color:var(--ink-muted);text-align:center;padding:10px;border-top:var(--border);margin-top:6px;">${t(`+ ${state.history.length - FREE_SESSION_LIMIT} sessioni nascoste — passa a Pro`, `+ ${state.history.length - FREE_SESSION_LIMIT} sessions hidden — upgrade to Pro`)}</div>`;
+  }
+}
+
+// ── POOL PACES ──
+function selectStyle(el, style) {
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  state.selectedStyle = style;
+}
+
+function calcPoolPaces() {
+  const min = parseInt(document.getElementById('pbMin').value) || 0;
+  const sec = parseInt(document.getElementById('pbSec').value) || 0;
+  const cs = parseInt(document.getElementById('pbCs').value) || 0;
+  const dist = parseInt(document.getElementById('pbDist').value);
+  const totalCs = min*6000 + sec*100 + cs;
+  if (totalCs <= 0) { toast('⚠ ' + t('Inserisci il tuo tempo di riferimento', 'Enter your reference time')); return; }
+
+  const decay = { 50:0.475, 100:1.0, 200:2.08, 400:4.35, 800:9.2, 1500:18.0 };
+  const d = decay[dist] || 1.0;
+  const pace100Cs = Math.round(totalCs / d);
+
+  const card = document.getElementById('poolPacesCard');
+  const list = document.getElementById('poolZonesList');
+  const owList = document.getElementById('owZonesList');
+  card.style.display = 'block';
+  list.innerHTML = ''; owList.innerHTML = '';
+
+  const zClasses = ['z1','z2','z3','z4','z5'];
+  Object.entries(ZONES).forEach(([key, z], i) => {
+    const poolPaceCs = Math.round(pace100Cs * z.coef);
+    const owPaceCs = Math.round(poolPaceCs * OW_PENALTY);
+    const fmt = cs => { const s = Math.floor(cs/100); const c = cs%100; return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}.${String(c).padStart(2,'0')}`; };
+    const label = lang === 'IT'
+      ? z.label
+      : z.label.replace('Aerobico base','Aerobic base').replace('Soglia','Threshold').replace('Ritmo gara','Race pace').replace('Sprint','Sprint');
+    list.innerHTML += `<div class="zone-row ${zClasses[i]}"><span class="zone-name" style="color:${z.color}">${key}</span><span class="zone-pace">${fmt(poolPaceCs)}/100m</span></div>`;
+    owList.innerHTML += `<div class="zone-row ${zClasses[i]}"><span class="zone-name" style="color:${z.color}">${label}</span><span class="zone-pace">~${fmt(owPaceCs)}/100m</span></div>`;
+  });
+
+  toast('✅ ' + t('Passi calcolati', 'Paces calculated'));
+}
+
+// ── SAFETY SHARE ──
+function toggleSafetyShare() {
+  state.safetyShare = !state.safetyShare;
+  document.getElementById('safetyDot').classList.toggle('active', state.safetyShare);
+  document.getElementById('shareToggle').classList.toggle('on', state.safetyShare);
+  updateSafetyText();
+  toast(state.safetyShare ? '📡 Safety ON' : '📴 Safety OFF');
+  save();
+}
+
+// ── WEATHER ──
+async function fetchWeather() {
+  if (!navigator.geolocation) { toast('⚠ GPS ' + t('non disponibile', 'not available')); return; }
+  toast('🌊 ' + t('Recupero condizioni…', 'Fetching conditions…'));
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude: lat, longitude: lon } = pos.coords;
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,wind_speed_10m&wind_speed_unit=kmh`;
+      const r = await fetch(url);
+      const d = await r.json();
+      const air = Math.round(d.current.temperature_2m);
+      const wind = Math.round(d.current.wind_speed_10m);
+      document.getElementById('wAir').textContent = air + '°C';
+      document.getElementById('wWind').textContent = wind + ' km/h';
+      document.getElementById('wWind').className = wind < 15 ? 'good' : wind < 30 ? 'ok' : 'bad';
+      const estWater = air - 5;
+      document.getElementById('wTemp').textContent = '~' + estWater + '°C';
+      document.getElementById('wTemp').className = estWater > 22 ? 'good' : estWater > 18 ? 'ok' : 'bad';
+      document.getElementById('waterTemp').textContent = '~' + estWater + '°C';
+      document.getElementById('wCond').textContent = wind < 15 ? t('Buono','Good') : wind < 25 ? t('Discreto','Fair') : t('Agitato','Rough');
+      document.getElementById('wCond').className = wind < 15 ? 'good' : wind < 25 ? 'ok' : 'bad';
+      toast('✅ ' + t('Condizioni aggiornate', 'Conditions updated'));
+    } catch(e) { toast('⚠ ' + t('Impossibile recuperare meteo', 'Could not fetch weather')); }
+  }, () => toast('⚠ GPS ' + t('negato', 'denied')));
+}
+
+function vibrate(p) { if (navigator.vibrate) navigator.vibrate(p); }
+
+if ('serviceWorker' in navigator) {
+  const sw = `const C='acore-ow-v2';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['/'])));self.skipWaiting();});self.addEventListener('activate',e=>e.waitUntil(clients.claim()));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/')))));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+</script>
+</body>
+</html>
