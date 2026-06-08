@@ -820,6 +820,7 @@ async function loginWithGoogle() {
   const errEl = document.getElementById('loginError');
   btn.disabled = true; btn.textContent = 'Attendere…'; errEl.style.display = 'none';
   try {
+    localStorage.setItem('acore_pending_app', 'openwater');
     await window.__sb.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.href }
