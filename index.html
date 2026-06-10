@@ -312,22 +312,28 @@ main {
   background: var(--bg-raised);
   border: 1px solid var(--app-color-border);
   border-radius: var(--radius);
-  padding: 14px 16px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 10px;
 }
-.paywall-text { font-size: 0.78rem; color: var(--ink-secondary); line-height: 1.4; }
+.paywall-icon { font-size: 2rem; flex-shrink: 0; line-height: 1; }
+.paywall-text { flex: 1; font-size: 0.85rem; color: var(--ink-secondary); line-height: 1.45; }
 .paywall-text strong {
   color: var(--app-color); display: block;
-  font-family: var(--font-data); font-size: 0.62rem;
-  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px;
+  font-family: var(--font-data); font-size: 0.68rem;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px;
 }
 .btn-pro {
-  flex-shrink: 0; padding: 7px 12px; border-radius: 8px;
+  flex-shrink: 0; padding: 9px 14px; border-radius: 8px;
   background: var(--app-color); color: #000;
-  font-family: var(--font-data); font-size: 0.65rem;
+  font-family: var(--font-data); font-size: 0.68rem;
   font-weight: 700; letter-spacing: 0.06em; white-space: nowrap; border: none; cursor: pointer;
+  transition: opacity 0.15s;
 }
+.btn-pro:hover { opacity: 0.85; }
 
 /* ── SAFETY PANEL ── */
 .safety-card {
@@ -607,8 +613,9 @@ main {
       <!-- Paywall after 3 sessions -->
       <div id="paywallBanner" style="display:none;">
         <div class="paywall-banner">
+          <div class="paywall-icon">🔒</div>
           <div class="paywall-text">
-            <strong id="paywallTitle">🔒 Piano Free — Limite raggiunto</strong>
+            <strong id="paywallTitle">Piano Free — Limite raggiunto</strong>
             <span id="paywallDesc">Passa a Pro per sessioni illimitate, storico completo e safety sharing avanzato.</span>
           </div>
           <button class="btn-pro">Pro 7€/m</button>
